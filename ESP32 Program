@@ -1,0 +1,59 @@
+/*
+ * ESP32 ADC + PWM Activity
+ * Activity A1, A2, and A3 combined based on Wokwi Wiring
+ */
+
+
+const int potPin = 34;    // Potentiometer Signal (SIG)
+const int ldrPin = 35;    // LDR Module Analog Output (AO)
+const int ntcPin = 32;    // NTC Module Signal (S)
+const int ledPin = 18;    // Red LED Anode
+
+// Constants for NTC Calculation
+const float BETA = 3950; // Standard Beta Coefficient for Wokwi NTC
+
+void setup() {
+  // Start serial communication at 115200 baud
+  Serial.begin(115200);
+  
+  // Initialize the LED pin as an output
+  pinMode(ledPin, OUTPUT);
+
+  // Note: ESP32 uses 12-bit ADC resolution (0 - 4095)
+}
+
+void loop() {
+  // --- A1: Potentiometer -> LED Brightness (PWM) ---
+  int potValue = analogRead(potPin);
+  // Map 12-bit ADC value (0-4095) to 8-bit PWM value (0-255)
+  int brightness = map(potValue, 0, 4095, 0, 255);
+
+  // --- A2: LDR -> Automatic Light Control ---
+  int ldrValue = analogRead(ldrPin);
+  
+  // Concept: If it's Dark (low LDR value), use Potentiometer brightness.
+  // If it's Bright (high LDR value), keep the LED OFF.
+  // (Note: On some modules, high light = low analog value; adjust if needed)
+  if (ldrValue > 2000) { 
+    // It is "Dark" -> Allow PWM control
+    analogWrite(ledPin, brightness); 
+  } else {
+    // It is "Bright" -> Force LED OFF
+    analogWrite(ledPin, 0); 
+  }
+
+  // --- A3: NTC Temperature Sensor ---
+  int ntcRaw = analogRead(ntcPin);
+  // Convert raw analog value to Celsius using the Beta coefficient
+  // 4095.0 is the max value for the ESP32 12-bit ADC
+  float celsius = 1 / (log(1 / (4095.0 / ntcRaw - 1)) / BETA + 1.0 / 298.15) - 273.15;
+
+  // --- Display Results to Serial Monitor ---
+  Serial.print("Pot: "); Serial.print(potValue);
+  Serial.print(" | LDR: "); Serial.print(ldrValue);
+  Serial.print(" | Temp: "); Serial.print(celsius);
+  Serial.println(" C");
+
+  // Small delay to make the Serial Monitor readable
+  delay(500); 
+}
