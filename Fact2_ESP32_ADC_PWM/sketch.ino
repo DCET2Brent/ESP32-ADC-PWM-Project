@@ -56,4 +56,11 @@ void loop() {
 
   // Small delay to make the Serial Monitor readable
   delay(500); 
+
+  //Group 5
+  //Ronnel Brent Brutas
+  //Anwil Shien Oli
+  //Ma. Kristal Czassandra A. Rivera
+  //John Jefferson Catibog
+  //Harold James Enciso
 }
